@@ -3,7 +3,7 @@
 
 #include "config.h"
 #include "geralv2r1.h"
-#include "lcdv2r6.h"
+
 
 // Pelo SDKCONFIG
 #define CONFIG_ESP32_WIFI_STATIC_RX_BUFFER_NUM 10                              // Define quantas pilhas estaticas (min).  //  Usar para nao dar erro no WIFI_INIT_CONFIG_DEFAULT()
@@ -37,18 +37,7 @@ char vlrAscIn[] = {"0000"};
 
 
 
-/* Aplicacao */
-char __convVlr(char valor) // Sub rotina de conversao de valores.
-{
-    char volta = 0; // Variavel Local criada e inicializada (obrigatorio).
-    if (valor >= '0' && valor <= '9')
-        volta = (valor - 48); // Calcula valores numericos.
-    if (valor >= 'A' && valor <= 'F')
-        volta = (valor - 55); // Calcula alfa maiusculas.
-    if (valor >= 'a' && valor <= 'f')
-        volta = (valor - 87); // Calcula alfa minusculas.
-    return (volta);           // Retorna o valor calculado.
-}
+
 
 
 
@@ -256,88 +245,6 @@ void nvs_init(void)
     ESP_ERROR_CHECK(esp_event_loop_create_default()); // Verifica se foi criado um Loop de eventos.
 }
 
-// esp_err_t get_handler(httpd_req_t *req)
-// {
-//     const char resp[] = "<!DOCTYPE html><html><head><title>ESP-IDF Fita Led</title>
-// <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head>
-// <body><style>*{font-family: Verdana;text-align: center;}</style>
-// <h2>Color Picker</h2><form action=\"\"><label for=\"rgb\"><h3>Cor:</h3></label>
-// <input type=\"color\" id=\"rgb\" name=\"rgb\" value=\"#0000ff\"><br><br><input type=\"submit\">
-// </form></body></html>";
-
-//     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
-//     return (ESP_OK);
-// }
-
-// esp_err_t get_handler_rgb(httpd_req_t *req)
-// {
-//     /**/
-//     const char resp[] = "<!DOCTYPE html><html><head><title>ESP-IDF Fita Led</title>
-// <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head>
-// <body><style>*{font-family: Verdana;text-align: center;}</style>
-// <h2>Color Picker</h2><form action=\"\" method=\"get\"><label for=\"rgb\"><h3>Cor:</h3></label>
-// <input type=\"color\" id=\"rgb\" name=\"rgb\" value=\"#0000ff\"><br><br><input type=\"submit\">
-// </form></body></html>";
-
-//     // httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
-//     /**/
-
-//     // Le a linha da URI e pega o host.
-//     char *buf;
-//     size_t buf_len;
-//     // buf_len = httpd_req_get_hdr_value_len(req, "Host") + 1;
-//     // if (buf_len > 1)
-//     // {
-//     //     buf = (char *) malloc(buf_len);
-//     //     if (httpd_req_get_hdr_value_str(req, "Host", buf, buf_len) == ESP_OK)
-//     //     {
-//     //         ESP_LOGI(TAG, "Host: %s", buf);
-//     //     }
-//     //     free(buf);
-//     // }
-
-//     // Le a linha da URI e pega o(s) parametro(s).
-//     buf_len = httpd_req_get_url_query_len(req) + 1;
-//     if (buf_len > 1)
-//     {
-//         char param[64]; // era 32
-//         buf = (char *) malloc(buf_len);
-//         if (httpd_req_get_url_query_str(req, buf, buf_len) == ESP_OK)
-//         {
-//             ESP_LOGI(TAG, "Dado na URL: %s", buf);
-//             // char param[64]; // era 32
-//             if (httpd_query_key_value(buf, "rgb", param, sizeof(param)) == ESP_OK)
-//             {
-//                 ESP_LOGI(TAG, "Valor RGB= %s", param);
-//                 hex2dec(param);
-//                 printf("Valor R= %d\n", valorR);
-//                 printf("Valor G= %d\n", valorG);
-//                 printf("Valor B= %d\n", valorB);
-//             }
-//         }
-//         free(buf);
-//     }
-//     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
-//     get_handler(req);
-//     return (ESP_OK);
-// }
-
-// /* Manipulador da estrutura da URI para metodo GET /uri */
-// httpd_uri_t uri_get =
-//     {
-//     .uri = "/",
-//     .method = HTTP_GET,
-//     .handler = get_handler,
-//     .user_ctx = NULL
-//     };
-
-// httpd_uri_t uri_get_rgb =
-//     {
-//     .uri = "/cor",
-//     .method = HTTP_GET,
-//     .handler = get_handler_rgb,
-//     .user_ctx = NULL
-//     };
 
 /**
  * @brief   Manipulador do metodo GET para uso das saidas (GPIO e MP).
@@ -468,25 +375,6 @@ void wifi_init(void)
     start_webserver(); // Inicializa o Servidor Web.
 }
 
-void printIp(char lin)
-{
-    char vlr[4];
 
-    int2Asc(ipPos1, vlr, 3);
-    lcdTexto(vlr, lin, 1);
-    lcdCaracter('.', lin, 4);
-
-    int2Asc(ipPos2, vlr, 3);
-    lcdTexto(vlr, lin, 5);
-    lcdCaracter('.', lin, 8);
-
-    int2Asc(ipPos3, vlr, 3);
-    lcdTexto(vlr, lin, 9);
-    lcdCaracter('.', lin, 12);
-
-    int2Asc(ipPos4, vlr, 3);
-    lcdTexto(vlr, lin, 13);
-    lcdCaracter(' ', lin, 16);
-}
 
 #endif
