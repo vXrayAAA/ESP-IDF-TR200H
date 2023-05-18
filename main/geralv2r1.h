@@ -10,7 +10,7 @@
 #include "freertos/event_groups.h"              // 
 
 #include "driver/gpio.h"						// Acesso ao uso das GPIOs.
-#include "driver/adc.h"							// Modulo conversor ADC. OBSOLETO!
+#include "driver/adc.h"							// Modulo conversor ADC. (OBSOLETO)!!!!!!!!!!!
 #include "soc/adc_channel.h"
 
 #include "esp_adc/adc_cali.h"
