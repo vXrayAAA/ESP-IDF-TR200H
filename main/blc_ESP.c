@@ -138,7 +138,7 @@ void app_main(void)
         .atten = ADC_ATTEN_DB_11,
     };
     adc_channel_t adc1_channel_t = gpio2adc(CONFIG_METER1_GPIO);     // Converte o número do pino GPIO em um canal ADC
-    ESP_LOGI(TAG, "CONFIG_METER1_GPIO=%d ADC1_GPIO32_CHANNEL=%d", CONFIG_METER1_GPIO, ADC1_GPIO32_CHANNEL);      // Registra o número do pino GPIO e o canal ADC correspondente
+    ESP_LOGI(TAG, "CONFIG_METER1_GPIO=%d ADC1_GPIO36_CHANNEL=%d", CONFIG_METER1_GPIO, ADC1_GPIO36_CHANNEL);      // Registra o número do pino GPIO e o canal ADC correspondente
     ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, ADC1_GPIO36_CHANNEL, &config));    // Configura o canal do ADC1
 
     // Read ADC value
