@@ -34,7 +34,9 @@
 
 int vlrQuery1; // Variavel para 'Query' do metodo 'GET'.
 char vlrAscIn[] = {"0000"};
-
+int ipPos1 = 0, ipPos2 = 0, ipPos3 = 0, ipPos4 = 0; // Variaveis para salvar o valor IP.
+static const char *TAG = "N1K_ESP32";               // TAG da Task atual.
+static int s_retry_num = 0;                         // Variavel para o numero de tentativas.
 
 
 
@@ -88,9 +90,7 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1
 
-int ipPos1 = 0, ipPos2 = 0, ipPos3 = 0, ipPos4 = 0; // Variaveis para salvar o valor IP.
-static const char *TAG = "N1K_ESP32";               // TAG da Task atual.
-static int s_retry_num = 0;                         // Variavel para o numero de tentativas.
+
 
 /**
  * @brief   Manipulador de eventos. Responsavel pelos eventos do WiFi.
@@ -246,100 +246,6 @@ void nvs_init(void)
 }
 
 
-/**
- * @brief   Manipulador do metodo GET para uso das saidas (GPIO e MP).
- * @note    Identifica os pares Query-Key e Query-Value.
- * @note    Sao utilizados: gpio?saida=____ e gpio?ang=____.
- */
-static esp_err_t gpio_get_handler(httpd_req_t *req)
-{
-
-
-    
-    char *buf;                                              // Reserva memoria para o Buffer.
-    size_t buf_len;                                         // Variavel do tamanho do Buffer.
-    buf_len = httpd_req_get_hdr_value_len(req, "Host") + 1; // Obtem o comprimento da string do cabecalho, aloca memoria +1, para terminacao nula.
-    if (buf_len > 1)                                        // Se houver dados no Buffer...
-    {
-        buf = (char *)malloc(buf_len);                                        // Aloca os dados conforme tamanho no Buffer.
-        if (httpd_req_get_hdr_value_str(req, "Host", buf, buf_len) == ESP_OK) // Se encontrar a String...
-        {
-            ESP_LOGI(TAG, "Found header => Host: %s", buf); // Envia a mensagem para o Terminal (Informacao).
-        }
-        free(buf); // Libera memoria alocada (Conserva recursos).
-    }
-    buf_len = httpd_req_get_hdr_value_len(req, "Test-Header-2") + 1; // Obtem o comprimento da string do cabecalho, aloca memoria +1, para terminacao nula.
-    if (buf_len > 1)                                                 // Se houver dados no Buffer...
-    {
-        buf = (char *)malloc(buf_len);                                                 // Aloca os dados conforme tamanho no Buffer.
-        if (httpd_req_get_hdr_value_str(req, "Test-Header-2", buf, buf_len) == ESP_OK) // Se encontrar a String...
-        {
-            ESP_LOGI(TAG, "Found header => Test-Header-2: %s", buf); // Envia a mensagem para o Terminal (Informacao).
-        }
-        free(buf); // Libera memoria alocada (Conserva recursos).
-    }
-    buf_len = httpd_req_get_hdr_value_len(req, "Test-Header-1") + 1; // Obtem o comprimento da string do cabecalho, aloca memoria +1, para terminacao nula.
-    if (buf_len > 1)                                                 // Se houver dados no Buffer...
-    {
-        buf = (char *)malloc(buf_len);                                                 // Aloca os dados conforme tamanho no Buffer.
-        if (httpd_req_get_hdr_value_str(req, "Test-Header-1", buf, buf_len) == ESP_OK) // Se encontrar a String...
-        {
-            ESP_LOGI(TAG, "Found header => Test-Header-1: %s", buf); // Envia a mensagem para o Terminal (Informacao).
-        }
-        free(buf); // Libera memoria alocada (Conserva recursos).
-    }
-    buf_len = httpd_req_get_url_query_len(req) + 1; // Obtem o comprimento da string do cabecalho, aloca memoria +1, para terminacao nula.
-    if (buf_len > 1)                                // Se houver dados no Buffer...
-    {
-        buf = (char *)malloc(buf_len);                                // Aloca os dados conforme tamanho no Buffer.
-        if (httpd_req_get_url_query_str(req, buf, buf_len) == ESP_OK) // Se encontrar a String...
-        {
-            ESP_LOGI(TAG, "Found URL query => %s", buf);                                   // Envia a mensagem para o Terminal (Informacao).
-            char param[32];                                                                // Aloca memoria para os parametros de recepcao.
-            char vlrSaida[4];                                                              // Reserva memoria para a saida.
-            if (httpd_query_key_value(buf, "saida", vlrSaida, sizeof(vlrSaida)) == ESP_OK) // Verifica o valor da Query, se for esta...
-            {
-                ESP_LOGI(TAG, "Parametro Saida= %s", vlrSaida); // Envia a mensagem para o Terminal (Informacao).
-                vlrQuery1 = atol(vlrSaida);                     // Salva valor convertido (ASCII->INT).
-            }
-
-            if (httpd_query_key_value(buf, "query3", param, sizeof(param)) == ESP_OK) // Verifica o valor da Query, se for esta...
-            {
-                ESP_LOGI(TAG, "Found URL query parameter => query3=%s", param); // Envia a mensagem para o Terminal (Informacao).
-            }
-            if (httpd_query_key_value(buf, "query2", param, sizeof(param)) == ESP_OK) // Verifica o valor da Query, se for esta...
-            {
-                ESP_LOGI(TAG, "Found URL query parameter => query2=%s", param); // Envia a mensagem para o Terminal (Informacao).
-            }
-        }
-        free(buf); // Libera memoria alocada (Conserva recursos).
-    }
-    httpd_resp_set_hdr(req, "Custom-Header-1", "Custom-Value-1"); // Define alguns cabecalhos personalizados.
-    httpd_resp_set_hdr(req, "Custom-Header-2", "Custom-Value-2"); // Define alguns cabecalhos personalizados.
-    const char *resp_str = (const char *)req->user_ctx;           // Define o contexto do usuario.
-    httpd_resp_send(req, resp_str, HTTPD_RESP_USE_STRLEN);        // Envia a resposta com cabecalhos personalizados e corpo definido como a string.
-    /**
-     * @note Depois de enviar a resposta HTTP, os antigos cabecalhos de solicitacao HTTP sao perdidos.
-     * */
-    if (httpd_req_get_hdr_value_len(req, "Host") == 0) // Se o tamanho for zero, dados perdidos...
-    {
-        ESP_LOGI(TAG, "Request headers lost"); // Envia a mensagem para o Terminal (Informacao).
-    }
-    return (ESP_OK); // Retorna valor 'Ok'.
-}
-
-/**
- * @brief   Cria a estrutura da URI.
- * @note    Metodo GET. Uso no GPIO.
- * @return  Valor ASCII das entradas.
- */
-static const httpd_uri_t gpio =
-    {
-        .uri = "/gpio",              // Caminho da URI.
-        .method = HTTP_GET,          // Metodo utilizado.
-        .handler = gpio_get_handler, // Nome do manipulador a ser usado.
-        .user_ctx = vlrAscIn         // Retorno ao cliente.
-};
 
 /**
  * @brief   Inicializa o Servidor Web Basico.
@@ -355,7 +261,7 @@ static httpd_handle_t start_webserver(void)
     ESP_LOGI(TAG, "Iniciando o Server na porta: '%d'", config.server_port); // Envia mensagem com dado para o Terminal.
     if (httpd_start(&server, &config) == ESP_OK)                            // Se o servidor foi configurado e esta ativo...
     {
-        httpd_register_uri_handler(server, &gpio);
+       // httpd_register_uri_handler(server, &gpio);
         
         ESP_LOGI(TAG, "URIs Registradas."); // Envia mensagem para o Terminal.
         return (server);                    // Retorna valor 'Status' do servidor.
